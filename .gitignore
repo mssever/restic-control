@@ -1,0 +1,10 @@
+.env
+.vscode
+*.bak
+*~
+*.swp
+*.swo
+*.pyc
+
+includes.txt
+excludes.txt

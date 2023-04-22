@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+# import argparse
+import os
+import shutil
+import sys
+
+from dotenv import load_dotenv
+from subprocess import call
+
+# def run_backup():
+#     cmd = [
+#         'restic',
+#         '-r',
+#         repo_path(),
+#         'backup',
+#         '/home/scott'
+#     ]
+#     return call(cmd)
+def call_restic(args, mode=None):
+    repo = ['-r', repo_path()]
+    other = []
+    if mode == 'backup':
+        try:
+            include = ['--files-from', os.environ['RESTIC_INCLUDES_FILE']]
+        except KeyError:
+            include = []
+        try:
+            exclude = ['--exclude-file', os.environ['RESTIC_EXCLUDES_FILE']]
+        except KeyError:
+            exclude = []
+        other = ['backup'] + other + include + exclude
+    
+    cmd = ['restic'] + repo + other + args
+    return call(cmd)
+
+def repo_path():
+    service = os.getenv('RESTIC_CONFIG_REMOTE_SERVICE')
+    if service == 'wasabi':
+        return f's3:https://{os.getenv("WASABI_SERVICE_URL")}/{os.getenv("WASABI_BUCKET_NAME")}'
+    else:
+        raise NotImplementedError(f'Unsupported remote service: {service}')
+
+def load_environment():
+    basedir = os.path.dirname(__file__)
+    env_file = os.path.join(basedir, '.env')
+    if not os.path.exists(env_file):
+        print(f'Not configured yet. Please edit the file "{env_file}" and make the necessary configuration settings.')
+        shutil.copyfile(os.path.join(basedir, 'env_base.sh'), env_file)
+        exit(10)
+    load_dotenv()
+
+# def parse_args():
+#     parser = argparse.ArgumentParser(__doc__)
+#     a = parser.add_argument
+#     backup='Run a backup'
+#     a('--backup', '-b', action='store_true', help=backup)
+#     return parser.parse_args()
+def parse_args():
+    args = sys.argv
+    switch = None
+    if args[1] == 'backup':
+        switch = 'backup'
+    return (switch, args[1:])
+
+def main():
+    switch, args = parse_args()
+    load_environment()
+    os.chdir(os.path.dirname(__file__))
+    # if args.backup:
+    #     return run_backup()
+    if switch == 'backup':
+        return call_restic(args, switch)
+    elif switch is None:
+        return call_restic(args)
+    else:
+        raise NotImplementedError()
+    return 0
+
+if __name__ == '__main__':
+    try:
+        exit(main())
+    except KeyboardInterrupt:
+        exit(1)
