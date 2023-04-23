@@ -15,6 +15,7 @@ Before running a backup, you should also create [includes][includes] and [exclud
 Except as indicated below, any arguments given to `restic_control.py` are passed unchanged to `restic`.
 
 - If the first argument to `restic_control.py` is `backup`, then a backup will be triggered as configured from the `.env` file. All arguments except `backup` will be passed to `restic`. Note that `restic_control.py` will specify arguments of its own in addition to whatever is passed on the command line.
+- If the first argument is `prune`, then this script will do `restic forget --prune` with the built in schedule of what to keep.
 
 [excludes]: https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files
 [includes]: https://restic.readthedocs.io/en/stable/040_backup.html#including-files
