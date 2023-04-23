@@ -59,7 +59,7 @@ def load_environment():
     env_file = os.path.join(basedir, '.env')
     if not os.path.exists(env_file):
         print(f'Not configured yet. Please edit the file "{env_file}" and make the necessary configuration settings.')
-        shutil.copyfile(os.path.join(basedir, 'env_base.sh'), env_file)
+        shutil.copyfile(os.path.join(basedir, 'env_base.txt'), env_file)
         exit(10)
     load_dotenv()
 
