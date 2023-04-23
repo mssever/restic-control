@@ -68,16 +68,9 @@ def exit_if_restic_already_running():
         # if 'restic' in proc:
             exit('A restic process is already running. Exiting.')
 
-# def parse_args():
-#     parser = argparse.ArgumentParser(__doc__)
-#     a = parser.add_argument
-#     backup='Run a backup'
-#     a('--backup', '-b', action='store_true', help=backup)
-#     return parser.parse_args()
 def parse_args():
     args = sys.argv
     switch = None
-    print(args)
     if len(args) == 1:
         return (switch, [])
     elif args[1] == 'backup':
