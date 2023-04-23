@@ -55,6 +55,8 @@ def call_restic(args, mode=None):
         main_cmd = make_backup_command()
     elif mode == 'prune':
         main_cmd = make_prune_command()
+    else:
+        main_cmd = []
     
     cmd = ['restic'] + main_cmd + repo + args
     code = call(str(i) for i in cmd)
