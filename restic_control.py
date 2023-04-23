@@ -7,7 +7,7 @@ import sys
 
 from datetime import datetime
 from dotenv import load_dotenv
-from subprocess import call
+from subprocess import call, run
 
 import psutil
 
@@ -20,32 +20,54 @@ import psutil
 #         '/home/scott'
 #     ]
 #     return call(cmd)
+def make_backup_command():
+    try:
+        include = ['--files-from', os.environ['RESTIC_INCLUDES_FILE']]
+        if not os.path.isfile(include[1]):
+                raise FileNotFoundError('Includes file configured but not found')
+    except KeyError:
+        include = []
+    try:
+        exclude = ['--exclude-file', os.environ['RESTIC_EXCLUDES_FILE']]
+        if not os.path.isfile(exclude[1]):
+                raise FileNotFoundError('Excludes file configured but not found')
+    except KeyError:
+        exclude = []
+    return ['backup'] + include + exclude
+
+def make_prune_command():
+    return [
+        'forget',
+        '--prune',
+        '--keep-last', 1,
+        '--keep-hourly', 2,
+        '--keep-daily', 3,
+        '--keep-weekly', 3,
+        '--keep-monthly', 3,
+        '--host', hostname(),
+        '--cleanup-cache'
+    ]
+
+
 def call_restic(args, mode=None):
     repo = ['-r', repo_path()]
-    other = []
     if mode == 'backup':
-        try:
-            include = ['--files-from', os.environ['RESTIC_INCLUDES_FILE']]
-            if not os.path.isfile(include[1]):
-                    raise FileNotFoundError('Includes file configured but not found')
-        except KeyError:
-            include = []
-        try:
-            exclude = ['--exclude-file', os.environ['RESTIC_EXCLUDES_FILE']]
-            if not os.path.isfile(exclude[1]):
-                    raise FileNotFoundError('Excludes file configured but not found')
-        except KeyError:
-            exclude = []
-        other = ['backup'] + other + include + exclude
-        dt = datetime.now()
-        other += ['--tag',
-                  f'date={dt.date().strftime("%Y-%m-%d")}',
-                  '--tag',
-                  f'time={dt.time().strftime("%H:%M:%S")}'
-                 ]
+        main_cmd = make_backup_command()
+    elif mode == 'prune':
+        main_cmd = make_prune_command()
     
-    cmd = ['restic'] + repo + other + args
-    return call(cmd)
+    cmd = ['restic'] + main_cmd + repo + args
+    code = call(str(i) for i in cmd)
+    if mode == 'backup' and code == 3:
+        print('WARNING: Some files not backed up!')
+    elif mode == 'backup' and code == 1:
+        print('ERROR: Fatal error while backing up!')
+    elif mode == 'prune' and code != 0:
+        print('ERROR while pruning!')
+    return code
+
+def hostname():
+    return run(['hostname'], capture_output=True, check=True, text=True).stdout.strip()
 
 def repo_path():
     service = os.getenv('RESTIC_CONFIG_REMOTE_SERVICE')
@@ -76,6 +98,9 @@ def parse_args():
     elif args[1] == 'backup':
         switch = 'backup'
         del args[1]
+    elif args[1] == 'prune':
+        switch = 'prune'
+        del args[1]
     return (switch, args[1:])
 
 def main():
@@ -85,7 +110,7 @@ def main():
     os.chdir(os.path.dirname(__file__))
     # if args.backup:
     #     return run_backup()
-    if switch == 'backup':
+    if switch in ('backup', 'prune'):
         return call_restic(args, switch)
     elif switch is None:
         return call_restic(args)
