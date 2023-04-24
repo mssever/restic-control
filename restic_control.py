@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import psutil
 
 implemented_commands = ('backup', 'prune', 'check', 'check_read')
+implemented_combo_commands = ('backup_check', 'backup_check_read')
 
 def make_backup_command():
     try:
@@ -31,11 +32,11 @@ def make_prune_command():
     return [
         'forget',
         '--prune',
-        '--keep-last', 1,
-        '--keep-hourly', 2,
-        '--keep-daily', 3,
-        '--keep-weekly', 3,
-        '--keep-monthly', 3,
+        '--keep-last', os.environ['RESTIC_PRUNE_KEEP_LAST'],
+        '--keep-hourly', os.environ['RESTIC_PRUNE_KEEP_HOURLY'],
+        '--keep-daily', os.environ['RESTIC_PRUNE_KEEP_DAILY'],
+        '--keep-weekly', os.environ['RESTIC_PRUNE_KEEP_WEEKLY'],
+        '--keep-monthly', os.environ['RESTIC_PRUNE_KEEP_MONTHLY'],
         '--host', hostname(),
         '--cleanup-cache'
     ]
@@ -71,6 +72,13 @@ def call_restic(args, mode=None):
         print('ERROR: Check failed!')
     return code
 
+def call_combo(args, calls):
+    for call in calls:
+        code = call_restic(args, call)
+        if code != 0:
+            return code
+    return 0
+
 def hostname():
     return run(['hostname'], capture_output=True, check=True, text=True).stdout.strip()
 
@@ -92,28 +100,30 @@ def load_environment():
 
 def exit_if_restic_already_running():
     if 'restic' in [i.name() for i in psutil.process_iter(['name'])]:
-        # if 'restic' in proc:
-            exit('A restic process is already running. Exiting.')
+        exit('A restic process is already running. Exiting.')
 
 def parse_args():
     args = sys.argv
     switch = None
     if len(args) == 1:
         return (switch, [])
-    elif args[1] in implemented_commands:
+    elif args[1] in implemented_commands or args[1] in implemented_combo_commands:
         switch = args[1]
         del args[1]
     return (switch, args[1:])
 
 def main():
     exit_if_restic_already_running()
+    os.chdir(os.path.dirname(__file__))
     switch, args = parse_args()
     load_environment()
-    os.chdir(os.path.dirname(__file__))
-    # if args.backup:
-    #     return run_backup()
     if switch in implemented_commands:
         return call_restic(args, switch)
+    elif switch in implemented_combo_commands:
+        if switch == 'backup_check':
+            return call_combo(args, ('backup', 'check'))
+        elif switch == 'backup_check_read':
+            return call_combo(args, ('backup', 'check_read'))
     elif switch is None:
         return call_restic(args)
     else:

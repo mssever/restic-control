@@ -19,3 +19,10 @@ RESTIC_INCLUDES_FILE=includes.txt
 
 # this file contains patterns to exclude from the backup, one per line
 RESTIC_EXCLUDES_FILE=excludes.txt
+
+# When pruning (forgetting), how many shapshots should be kept?
+RESTIC_PRUNE_KEEP_LAST=1
+RESTIC_PRUNE_KEEP_HOURLY=2
+RESTIC_PRUNE_KEEP_DAILY=3
+RESTIC_PRUNE_KEEP_WEEKLY=3
+RESTIC_PRUNE_KEEP_MONTHLY=3

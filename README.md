@@ -19,6 +19,13 @@ Except as indicated below, any arguments given to `restic_control.py` are passed
 - A first argument of `check` runs a basic verification of the repository.
 - A first argument of `check_read` does a `check`, followed by a test read of 1/7 of the repository, as determined by the day of the week.
 
+### Combo commands
+
+The following, when given as the first argument, run a combination of the above commands. The script only continues to the next command in the chain if the previous one exited with a status code of 0.
+
+- `backup_check`: Runs `backup` followed by `check`.
+- `backup_check_read`: Runs `backup` followed by `check_read`.
+
 [excludes]: https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files
 [includes]: https://restic.readthedocs.io/en/stable/040_backup.html#including-files
 [restic]: https://restic.readthedocs.io/
