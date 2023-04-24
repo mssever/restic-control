@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import psutil
 
 implemented_commands = ('backup', 'prune', 'check', 'check_read')
-implemented_combo_commands = ('backup_check', 'backup_check_read')
+#implemented_combo_commands = ('backup_check', 'backup_check_read')
 
 def call_combo(args, calls):
     for call in calls:
@@ -68,11 +68,8 @@ def main():
     load_environment()
     if switch in implemented_commands:
         return call_restic(args, switch)
-    elif switch in implemented_combo_commands:
-        if switch == 'backup_check':
-            return call_combo(args, ('backup', 'check'))
-        elif switch == 'backup_check_read':
-            return call_combo(args, ('backup', 'check_read'))
+    elif switch is not None and '/' in switch and all(s in implemented_commands for s in switch.split('/')):
+        return call_combo(args, switch.split('/'))
     elif switch is None:
         return call_restic(args)
     else:
@@ -82,13 +79,13 @@ def make_backup_command():
     try:
         include = ['--files-from', os.environ['RESTIC_INCLUDES_FILE']]
         if not os.path.isfile(include[1]):
-                raise FileNotFoundError('Includes file configured but not found')
+            raise FileNotFoundError('Includes file configured but not found')
     except KeyError:
         include = []
     try:
         exclude = ['--exclude-file', os.environ['RESTIC_EXCLUDES_FILE']]
         if not os.path.isfile(exclude[1]):
-                raise FileNotFoundError('Excludes file configured but not found')
+            raise FileNotFoundError('Excludes file configured but not found')
     except KeyError:
         exclude = []
     return ['backup'] + include + exclude
@@ -117,7 +114,7 @@ def parse_args():
     switch = None
     if len(args) == 1:
         return (switch, [])
-    elif args[1] in implemented_commands or args[1] in implemented_combo_commands:
+    elif args[1] in implemented_commands or ('/' in args[1] and all(s in implemented_commands for s in args[1].split('/'))):
         switch = args[1]
         del args[1]
     return (switch, args[1:])

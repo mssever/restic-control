@@ -21,10 +21,12 @@ Except as indicated below, any arguments given to `restic_control.py` are passed
 
 ### Combo commands
 
-The following, when given as the first argument, run a combination of the above commands. The script only continues to the next command in the chain if the previous one exited with a status code of 0.
+The first argument can be a list of the above commands, separated by `/`. The commands will be executed in sequence, and execution will stop if any command returns a nonzero exit status.
 
-- `backup_check`: Runs `backup` followed by `check`.
-- `backup_check_read`: Runs `backup` followed by `check_read`.
+#### Examples
+
+- `restic_control.py backup/check`
+- `restic_control.py backup/check_read`
 
 [excludes]: https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files
 [includes]: https://restic.readthedocs.io/en/stable/040_backup.html#including-files
