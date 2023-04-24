@@ -98,11 +98,8 @@ def parse_args():
     switch = None
     if len(args) == 1:
         return (switch, [])
-    elif args[1] == 'backup':
-        switch = 'backup'
-        del args[1]
-    elif args[1] == 'prune':
-        switch = 'prune'
+    elif args[1] in ('backup', 'prune', 'check', 'check_read'):
+        switch = args[1]
         del args[1]
     return (switch, args[1:])
 
