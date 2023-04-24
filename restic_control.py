@@ -10,6 +10,8 @@ from subprocess import call, run
 from dotenv import load_dotenv
 import psutil
 
+implemented_commands = ('backup', 'prune', 'check', 'check_read')
+
 def make_backup_command():
     try:
         include = ['--files-from', os.environ['RESTIC_INCLUDES_FILE']]
@@ -98,7 +100,7 @@ def parse_args():
     switch = None
     if len(args) == 1:
         return (switch, [])
-    elif args[1] in ('backup', 'prune', 'check', 'check_read'):
+    elif args[1] in implemented_commands:
         switch = args[1]
         del args[1]
     return (switch, args[1:])
@@ -110,7 +112,7 @@ def main():
     os.chdir(os.path.dirname(__file__))
     # if args.backup:
     #     return run_backup()
-    if switch in ('backup', 'prune'):
+    if switch in implemented_commands:
         return call_restic(args, switch)
     elif switch is None:
         return call_restic(args)
