@@ -16,6 +16,8 @@ Except as indicated below, any arguments given to `restic_control.py` are passed
 
 - If the first argument to `restic_control.py` is `backup`, then a backup will be triggered as configured from the `.env` file. All arguments except `backup` will be passed to `restic`. Note that `restic_control.py` will specify arguments of its own in addition to whatever is passed on the command line.
 - If the first argument is `prune`, then this script will do `restic forget --prune` with the built in schedule of what to keep.
+- A first argument of `check` runs a basic verification of the repository.
+- A first argument of `check_read` does a `check`, followed by a test read of 1/7 of the repository, as determined by the day of the week.
 
 [excludes]: https://restic.readthedocs.io/en/stable/040_backup.html#excluding-files
 [includes]: https://restic.readthedocs.io/en/stable/040_backup.html#including-files

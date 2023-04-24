@@ -1,25 +1,15 @@
 #!/usr/bin/env python3
 
-# import argparse
 import os
 import shutil
 import sys
 
 from datetime import datetime
-from dotenv import load_dotenv
 from subprocess import call, run
 
+from dotenv import load_dotenv
 import psutil
 
-# def run_backup():
-#     cmd = [
-#         'restic',
-#         '-r',
-#         repo_path(),
-#         'backup',
-#         '/home/scott'
-#     ]
-#     return call(cmd)
 def make_backup_command():
     try:
         include = ['--files-from', os.environ['RESTIC_INCLUDES_FILE']]
@@ -48,6 +38,11 @@ def make_prune_command():
         '--cleanup-cache'
     ]
 
+def make_check_command(read_data=None):
+    cmd = ['check']
+    if read_data:
+        cmd += ['--read-data-subset', f'{read_data}/7']
+    return cmd
 
 def call_restic(args, mode=None):
     repo = ['-r', repo_path()]
@@ -55,6 +50,10 @@ def call_restic(args, mode=None):
         main_cmd = make_backup_command()
     elif mode == 'prune':
         main_cmd = make_prune_command()
+    elif mode == 'check':
+        main_cmd = make_check_command()
+    elif mode == 'check_read':
+        main_cmd = make_check_command(datetime.now().weekday() + 1)
     else:
         main_cmd = []
     
@@ -66,6 +65,8 @@ def call_restic(args, mode=None):
         print('ERROR: Fatal error while backing up!')
     elif mode == 'prune' and code != 0:
         print('ERROR while pruning!')
+    elif mode in ('check', 'check_read') and code != 0:
+        print('ERROR: Check failed!')
     return code
 
 def hostname():
