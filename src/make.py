@@ -26,11 +26,11 @@ def prune_command():
     return [
         'forget',
         '--prune',
-        '--keep-last', os.environ['RESTIC_PRUNE_KEEP_LAST'],
-        '--keep-hourly', os.environ['RESTIC_PRUNE_KEEP_HOURLY'],
-        '--keep-daily', os.environ['RESTIC_PRUNE_KEEP_DAILY'],
-        '--keep-weekly', os.environ['RESTIC_PRUNE_KEEP_WEEKLY'],
-        '--keep-monthly', os.environ['RESTIC_PRUNE_KEEP_MONTHLY'],
+        '--keep-last', os.environ.get('RESTIC_PRUNE_KEEP_LAST', 5),
+        '--keep-hourly', os.environ.get('RESTIC_PRUNE_KEEP_HOURLY', 24),
+        '--keep-daily', os.environ.get('RESTIC_PRUNE_KEEP_DAILY', 7),
+        '--keep-weekly', os.environ.get('RESTIC_PRUNE_KEEP_WEEKLY', 4),
+        '--keep-monthly', os.environ.get('RESTIC_PRUNE_KEEP_MONTHLY', 12),
         '--host', hostname(),
         '--cleanup-cache'
     ]
