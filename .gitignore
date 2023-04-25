@@ -6,5 +6,7 @@
 *.swo
 *.pyc
 
+__pycache__
+
 includes.txt
 excludes.txt
