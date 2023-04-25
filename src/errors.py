@@ -1,3 +1,6 @@
+import sys
+from subprocess import call
+
 class PrerequisiteError(Exception):
     pass
 
