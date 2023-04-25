@@ -5,7 +5,7 @@ from .util import repo_path
 
 def combo(args, calls):
     for call in calls:
-        code = call_restic(args, call)
+        code = restic(args, call)
         if code != 0:
             return code
     return 0
