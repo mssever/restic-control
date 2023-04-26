@@ -26,3 +26,8 @@ RESTIC_PRUNE_KEEP_HOURLY=2
 RESTIC_PRUNE_KEEP_DAILY=3
 RESTIC_PRUNE_KEEP_WEEKLY=3
 RESTIC_PRUNE_KEEP_MONTHLY=3
+
+# How to report errors. Options: print, notify, nc; where print prints to the
+# terminal, notify calls yad, and nc uses netcat to send the message over the
+# network. Can also be overriden when called.
+RESTIC_CONTROL_ERROR_REPORTING=print

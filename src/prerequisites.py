@@ -3,7 +3,6 @@ import shutil
 import sys
 import warnings
 
-from . import errors
 
 try:
     from dotenv import load_dotenv
@@ -15,16 +14,21 @@ try:
 except ImportError:
     exit('The psutil module is required.\n\nsudo apt install python3-psutil')
 
+class PrerequisiteError(Exception):
+    pass
+
 def check_basic():
-    failed = []
-    for prereq in ('restic', 'yad', 'notify-send'):
-        if shutil.which(prereq) is None:
-            failed.append(prereq)
-    if len(failed) != 0:
-        if 'restic' in failed:
-            raise errors.PrerequisiteError('The restic command is not available on this system!')
-        else:
-            [warnings.warn(f'The command "{i}" is not available, so its features will not work!') for i in failed]
+    if shutil.which('restic') is None:
+        raise PrerequisiteError('The restic command is not available on this system!')
+
+def load_environment():
+    basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    env_file = os.path.join(basedir, '.env')
+    if not os.path.exists(env_file):
+        print(f'Not configured yet. Please edit the file "{env_file}" and make the necessary configuration settings.')
+        shutil.copyfile(os.path.join(basedir, 'env_base.txt'), env_file)
+        exit(10)
+    load_dotenv()
 
 def root_required():
     if len(sys.argv) > 1 and 'backup' in sys.argv[1]:
